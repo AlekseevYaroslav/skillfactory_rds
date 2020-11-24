@@ -1,0 +1,149 @@
+4.1
+SELECT city,
+       count(city)
+FROM dst_project.airports
+GROUP BY city
+HAVING count(city)>1
+ORDER BY 2 DESC
+
+4.2.1
+SELECT count(DISTINCT status)
+FROM dst_project.flights
+
+4.2.2
+SELECT status,
+       count(status)
+FROM dst_project.flights
+GROUP BY status
+HAVING status='Departed'
+
+4.2.3
+SELECT count(aircraft_code)
+FROM dst_project.seats
+WHERE aircraft_code = '773'
+
+4.2.4
+SELECT count(flight_id)
+FROM dst_project.flights
+WHERE actual_arrival BETWEEN '2017-04-01 00:00:00' AND '2017-09-01 00:00:00'
+  AND status = 'Arrived'
+
+4.3.1
+SELECT count(flight_id)
+FROM dst_project.flights
+WHERE status = 'Cancelled'
+
+4.3.2
+SELECT count(aircraft_code)
+FROM dst_project.aircrafts
+WHERE model like 'Boeing%'
+
+4.3.3
+SELECT count(aircraft_code)
+FROM dst_project.aircrafts
+WHERE model like 'Sukhoi Superjet%'
+
+4.3.4
+SELECT count(aircraft_code)
+FROM dst_project.aircrafts
+WHERE model like 'Airbus%'
+
+4.3.3
+SELECT count(airport_code)
+FROM dst_project.airports
+WHERE timezone like 'Asia%'
+
+SELECT count(airport_code)
+FROM dst_project.airports
+WHERE timezone like 'Europe%'
+
+4.3.4
+SELECT flight_id,
+       actual_arrival - scheduled_arrival AS delay
+FROM dst_project.flights
+WHERE actual_arrival IS NOT NULL
+  AND scheduled_arrival IS NOT NULL
+ORDER BY 2 DESC
+LIMIT 1
+
+4.4.1
+SELECT scheduled_departure
+FROM dst_project.flights
+ORDER BY 1
+LIMIT 1
+
+4.4.2
+SELECT max(scheduled_arrival - scheduled_departure)
+FROM dst_project.flights
+
+4.4.3
+ptions: Show plain text | Copy to clipboard | Print result
+SELECT departure_airport,
+       arrival_airport,
+       scheduled_arrival - scheduled_departure AS diff
+FROM dst_project.flights
+WHERE (scheduled_arrival - scheduled_departure) =
+    (SELECT max(scheduled_arrival - scheduled_departure)
+     FROM dst_project.flights)
+LIMIT 1
+
+4.4.4
+SELECT (EXTRACT (HOUR
+                 FROM avg(f.scheduled_arrival - f.scheduled_departure)*60))
+FROM dst_project.flights f
+
+4.5.1
+SELECT fare_conditions,
+       count(fare_conditions)
+FROM dst_project.seats
+WHERE aircraft_code = 'SU9'
+GROUP BY fare_conditions
+ORDER BY 2 DESC
+LIMIT 1
+
+4.5.2
+SELECT min(total_amount)
+FROM dst_project.bookings
+
+4.5.3
+SELECT bp.seat_no
+FROM dst_project.boarding_passes bp
+JOIN dst_project.tickets t ON bp.ticket_no = t.ticket_no
+WHERE t.passenger_id='4313 788533'
+
+5.1
+SELECT count(actual_arrival)
+FROM dst_project.flights
+WHERE arrival_airport = 'AAQ'
+  AND scheduled_departure BETWEEN '2017-01-01 00:00:00' AND '2018-01-01 00:00:00'
+
+5.2
+SELECT count(actual_departure)
+FROM dst_project.flights
+WHERE departure_airport = 'AAQ'
+  AND (actual_departure BETWEEN '2017-01-01 00:00:00' AND '2017-03-01 00:00:00'
+       OR actual_departure BETWEEN '2017-12-01 00:00:00' AND '2018-01-01 00:00:00')
+
+5.3
+SELECT count(status)
+FROM dst_project.flights
+WHERE status = 'Cancelled'
+    and departure_airport = 'AAQ'
+
+5.4
+SELECT count(f.flight_id)
+FROM dst_project.flights f
+JOIN dst_project.airports a ON f.arrival_airport = a.airport_code
+WHERE f.departure_airport = 'AAQ'
+  AND a.city != 'Moscow'
+
+5.5
+SELECT a.model,
+       count(DISTINCT s.seat_no)
+FROM dst_project.flights f
+JOIN dst_project.seats s ON f.aircraft_code = s.aircraft_code
+JOIN dst_project.aircrafts a ON f.aircraft_code = a.aircraft_code
+WHERE f.departure_airport = 'AAQ'
+GROUP BY a.model
+LIMIT 1
+
